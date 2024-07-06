@@ -1,0 +1,6 @@
+[submodule "aurora-nav"]
+	path = aurora-nav
+	url = https://github.com/joshepen/aurora-nav
+[submodule "auroranav"]
+	path = auroranav
+	url = https://github.com/joshepen/aurora-nav
