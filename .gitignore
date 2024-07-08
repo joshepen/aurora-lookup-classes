@@ -1,3 +1,7 @@
 .venv/
-courses.txt
+.venvwin/
+courses*.txt
+input/*
+output/*
 __pycache__
+*.xlsx
