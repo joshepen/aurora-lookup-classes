@@ -29,7 +29,9 @@ def LookupClasses(filename):
     nav.Login(userID, password)
     data = []
     for name in names:
-        data.append(GetClassInfo(nav, semester, name))
+        currData = GetClassInfo(nav, semester, name)
+        if len(currData["table"]) > 0:
+            data.append(currData)
 
     CourseInfoToSpreadsheet(OUTPUT_DIR + semester + ".xlsx", data)
 
@@ -56,7 +58,7 @@ def GetCatalogInfo(nav: AuroraNav, semester, courseName):
 
     nav.SelectTerm(semester)
     nav.SelectDepartment(courseName.split(" ")[0])
-    if nav.GoToPage(courseName):
+    if nav.GoToPage(courseName, elementType="a"):
         return ProcessCatalogPage(
             BeautifulSoup(nav.GetPageContents(), features="html.parser")
         )
@@ -151,7 +153,8 @@ def GetWantedColumnIndices(headerRow: BeautifulSoup):
 def GetClassInfo(nav: AuroraNav, semester, name):
     data = {}
     data["table"] = GetLUCInfo(nav, semester, name)
-    data["description"] = GetCatalogInfo(nav, semester, name)
+    if len(data["table"]) > 0:
+        data["description"] = GetCatalogInfo(nav, semester, name)
     data["name"] = name
     return data
 
@@ -170,7 +173,7 @@ def CourseInfoToSpreadsheet(filepath, data: list[dict]):
                 ws.cell(row=rowIndex, column=colIndex).value = header
                 colIndex += 1
             rowIndex += 1
-            # Add data per section (time)
+            # Add data per section
             for section in course["table"]:
                 colIndex = 1
                 for header in section:
@@ -179,7 +182,7 @@ def CourseInfoToSpreadsheet(filepath, data: list[dict]):
                             header
                         ][i]
                     colIndex += 1
-                rowIndex += 1
+                rowIndex += i
     wb.remove(wb["Sheet"])
     wb.save(filepath)
 
