@@ -142,7 +142,7 @@ def ProcessCatalogPage(page: BeautifulSoup):
 
 def GetWantedColumnIndices(headerRow: BeautifulSoup):
     wantedColumns = [
-        "CRN,",
+        "CRN",
         "Sec",
         "Cmp",
         "Title",
