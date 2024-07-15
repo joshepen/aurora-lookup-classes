@@ -114,7 +114,7 @@ def ProcessLUCPage(pageContents: BeautifulSoup):
         ):
             for columnName in wantedColumns:
                 columnIndex = wantedColumns[columnName]
-                value = table.contents[trIndex].contents[columnIndex].string
+                value = table.contents[trIndex].contents[columnIndex].get_text()
                 if value != None:
                     value = value.replace("\xa0", "")
                 currSection[columnName].append(value)
@@ -134,7 +134,10 @@ def ProcessLUCPage(pageContents: BeautifulSoup):
 
 
 def ProcessCatalogPage(page: BeautifulSoup):
-    return page.find("td", class_="ntdefault").get_text()
+    return {
+        "name": page.find("td", class_="nttitle").get_text(),
+        "description": page.find("td", class_="ntdefault").get_text(),
+    }
 
 
 def GetWantedColumnIndices(headerRow: BeautifulSoup):
@@ -148,6 +151,7 @@ def GetWantedColumnIndices(headerRow: BeautifulSoup):
         "Instructor",
         "Date",
         "Rem",
+        "WL Act",
     ]
     wantedIndices = {}
     for i in range(len(headerRow.contents)):
@@ -164,7 +168,9 @@ def GetClassInfo(nav: AuroraNav, semester, name):
     course.AddSections(lookupData["sections"])
     course.SetHeaders(lookupData["headers"])
     if len(course) > 0:
-        description = GetCatalogInfo(nav, semester, name)
+        catalogInfo = GetCatalogInfo(nav, semester, name)
+        description = catalogInfo["description"]
+        course.SetFullName(catalogInfo["name"].strip())
 
         # decrease the amount of whitespace
         description = description.replace("\n\n", "\n")

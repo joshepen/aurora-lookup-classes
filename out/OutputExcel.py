@@ -10,7 +10,7 @@ class OutputExcel(IOutput):
         wb = xl.Workbook()
         sortedData = sorted(data, key=OutputExcel.CourseDataSortFn)
         for course in sortedData:
-            ws = wb.create_sheet(course.GetName())
+            ws = wb.create_sheet(course.GetFullName())
             ws["A1"].value = course.GetDescription()
             if len(course) > 0:
                 rowIndex = 2
