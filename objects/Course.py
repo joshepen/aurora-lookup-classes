@@ -24,6 +24,12 @@ class Course:
     def GetName(self):
         return self.name
 
+    def SetFullName(self, fullName: str):
+        self.fullName = fullName
+
+    def GetFullName(self):
+        return self.fullName
+
     def GetDescription(self):
         return self.description
 

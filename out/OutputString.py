@@ -11,7 +11,7 @@ class OutputString(IOutput):
     def output(data: list[Course], filepath: str = None) -> str:
         string = ""
         for course in data:
-            string += f"{course.GetName()}\n{course.GetDescription()}\n"
+            string += f"{course.GetFullName()}\n{course.GetDescription()}\n"
             if len(course) > 0:
                 string += tabulate(
                     itertools.chain.from_iterable(course.GetSections()),
