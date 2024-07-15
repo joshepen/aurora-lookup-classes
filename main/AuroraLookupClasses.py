@@ -1,8 +1,9 @@
 from bs4 import BeautifulSoup
 from auroranav.AuroraNav import AuroraNav
 import os
-import openpyxl as xl
-import threading
+from objects.Course import Course
+from out.OutputExcel import OutputExcel
+from out.OutputString import OutputString
 
 INPUT_DIR = "input/"
 OUTPUT_DIR = "output/"
@@ -24,18 +25,18 @@ def LookupClasses(filename):
     userID = GetUserID(filename)
     password = GetPassword(filename)
 
-    nav = AuroraNav(headless=False)
+    nav = AuroraNav()
     nav.OpenAurora()
     nav.Login(userID, password)
     data = []
     for name in names:
-        currData = GetClassInfo(nav, semester, name)
-        if len(currData["table"]) > 0:
-            data.append(currData)
-
-    CourseInfoToSpreadsheet(OUTPUT_DIR + semester + ".xlsx", data)
+        currCourse = GetClassInfo(nav, semester, name)
+        if len(currCourse) > 0:
+            data.append(currCourse)
 
     nav.CloseWindow()
+
+    OutputString.output(data, f"{OUTPUT_DIR+semester}.txt")
 
 
 def GetUserID(filepath):
@@ -77,7 +78,7 @@ def GetLUCInfo(nav: AuroraNav, semester, name):
         content = BeautifulSoup(nav.GetPageContents(), features="html.parser")
         content = ProcessLUCPage(content)
         return content
-    return []
+    return {"sections": [], "headers": []}
 
 
 def GetSemester(filename):
@@ -101,9 +102,9 @@ def ProcessLUCPage(pageContents: BeautifulSoup):
     data = []
     wantedColumns = GetWantedColumnIndices(table.contents[2])
 
-    currItem = {}
+    currSection = {}
     for name in wantedColumns:
-        currItem[name] = []
+        currSection[name] = []
 
     for trIndex in range(3, len(table.contents)):
         if (
@@ -114,15 +115,22 @@ def ProcessLUCPage(pageContents: BeautifulSoup):
             for columnName in wantedColumns:
                 columnIndex = wantedColumns[columnName]
                 value = table.contents[trIndex].contents[columnIndex].string
-                currItem[columnName].append(value)
+                if value != None:
+                    value = value.replace("\xa0", "")
+                currSection[columnName].append(value)
 
         elif table.contents[trIndex].find("hr") not in [None, -1]:
-            data.append(currItem)
-            currItem = {}
+            # transpose data for easier processing
+            currSection = [
+                [row[i] for row in list(currSection.values())]
+                for i in range(len(list(currSection.values())[0]))
+            ]
+            data.append(currSection)
+            currSection = {}
             for name in wantedColumns:
-                currItem[name] = []
+                currSection[name] = []
 
-    return data
+    return {"sections": data, "headers": list(wantedColumns.keys())}
 
 
 def ProcessCatalogPage(page: BeautifulSoup):
@@ -151,60 +159,21 @@ def GetWantedColumnIndices(headerRow: BeautifulSoup):
 
 
 def GetClassInfo(nav: AuroraNav, semester, name):
-    data = {}
-    data["table"] = GetLUCInfo(nav, semester, name)
-    if len(data["table"]) > 0:
-        data["description"] = GetCatalogInfo(nav, semester, name)
-    data["name"] = name
-    return data
+    course = Course(name.strip())
+    lookupData = GetLUCInfo(nav, semester, name)
+    course.AddSections(lookupData["sections"])
+    course.SetHeaders(lookupData["headers"])
+    if len(course) > 0:
+        description = GetCatalogInfo(nav, semester, name)
 
-
-def CourseInfoToSpreadsheet(filepath, data: list[dict]):
-    wb = xl.Workbook()
-    sortedData = sorted(data, key=CourseDataSortFn)
-    for course in sortedData:
-        ws = wb.create_sheet(course["name"])
-        ws["A1"].value = course["description"]
-        if len(course["table"]) > 0:
-            rowIndex = 2
-            colIndex = 1
-            # Create header row
-            for header in course["table"][0]:
-                ws.cell(row=rowIndex, column=colIndex).value = header
-                colIndex += 1
-            rowIndex += 1
-            # Add data per section
-            for section in course["table"]:
-                colIndex = 1
-                for header in section:
-                    for i in range(len(section[header])):
-                        ws.cell(row=rowIndex + i, column=colIndex).value = section[
-                            header
-                        ][i]
-                    colIndex += 1
-                rowIndex += i
-    wb.remove(wb["Sheet"])
-    wb.save(filepath)
-
-
-def CourseDataSortFn(course: dict):
-    if len(course["table"]) == 0:
-        return str(
-            [
-                0xFF,
-                0xFF,
-                0xFF,
-                0xFF,
-                0xFF,
-                0xFF,
-                0xFF,
-                0xFF,
-                0xFF,
-                0xFF,
-            ]
-        )
-    else:
-        return course["name"]
+        # decrease the amount of whitespace
+        description = description.replace("\n\n", "\n")
+        description = description.replace("\n\n", "\n")
+        if "Restrictions" in description:
+            description = description[: description.find("Restrictions")]
+        description = description.strip()
+        course.SetDescription(description)
+    return course
 
 
 if __name__ == "__main__":
