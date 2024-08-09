@@ -1,19 +1,27 @@
 import tkinter as tk
 import tkinter.font
+import os
+from out.IOutput import IOutput
+from out.OutputString import OutputString
+from logic.AuroraLookupClasses import AuroraLookupClasses
+
+INPUT_DIR = "input/"
+OUTPUT_DIR = "output/"
 
 
 class TkGUI:
-    def __init__(self):
+    def __init__(self, alu: AuroraLookupClasses):
+        self.alu = alu
         self.root = tk.Tk()
         self.root.title("AuroraLookupClasses")
         self.consolasFont = tk.font.Font(family="Consolas")
-        self.CreateWidgets()
-        self.PlaceWidgets()
+        self.__CreateWidgets()
+        self.__PlaceWidgets()
 
     def Start(self):
         self.root.mainloop()
 
-    def CreateWidgets(self):
+    def __CreateWidgets(self):
         self.inputBox = tk.Text(self.root, font=self.consolasFont, width=30, height=10)
         self.usernameLabel = tk.Label(
             self.root, text="User ID:", font=self.consolasFont
@@ -41,9 +49,11 @@ class TkGUI:
         self.messageBar.insert(0, "Enter course names in text box or txt filename.")
         self.messageBar.config(state=tk.DISABLED)
 
-        self.startButton = tk.Button(self.root, text="Start", width=10)
+        self.startButton = tk.Button(
+            self.root, text="Start", width=10, command=self.Lookup
+        )
 
-    def PlaceWidgets(self):
+    def __PlaceWidgets(self):
         self.usernameLabel.grid(row=0, column=0, padx=10, pady=10)
         self.usernameEntry.grid(row=0, column=1, padx=10, pady=10)
 
@@ -65,7 +75,31 @@ class TkGUI:
         self.startButton.grid(row=0, column=3, rowspan=5, padx=10, pady=10, sticky="NS")
 
     def DisplayMessage(self, message: str):
-        self.messageBar.config(state=tk.ACTIVE)
+        self.messageBar.config(state=tk.NORMAL)
         self.messageBar.delete(0, tk.END)
         self.messageBar.insert(0, message)
         self.messageBar.config(state=tk.DISABLED)
+
+    def GetCourseNames(self):
+        names = [
+            name.strip()
+            for name in self.inputBox.get("1.0", tk.END).split("\n")
+            if name.strip() != ""
+        ]
+        if len(names) > 0:
+            if names[0] in os.listdir(INPUT_DIR):
+                with open(INPUT_DIR + names[0]) as file:
+                    names = [name.strip() for name in file.readlines()]
+
+        return names
+
+    def Lookup(self):
+        self.alu.LookupClasses(
+            self.usernameEntry.get(),
+            self.passwordEntry.get(),
+            self.semesterEntry.get(),
+            self.GetCourseNames(),
+            OutputString.output,
+            OUTPUT_DIR + self.outFilenameEntry.get() + ".txt",
+            headless=False,
+        )
