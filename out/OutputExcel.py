@@ -26,7 +26,7 @@ class OutputExcel(IOutput):
                         ws.cell(row=rowIndex, column=colIndex + 1).value = row[colIndex]
                     rowIndex += 1
         wb.remove(wb["Sheet"])
-        wb.save(filepath)
+        wb.save(filepath + ".xlsx")
 
     @staticmethod
     def CourseDataSortFn(course: Course):

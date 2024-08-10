@@ -22,7 +22,7 @@ class OutputString(IOutput):
         if filepath != None:
             if not os.path.exists(filepath[: filepath.rfind("/")]):
                 os.mkdir(filepath[: filepath.rfind("/")])
-            with open(filepath, "w") as file:
+            with open(filepath + ".txt", "w") as file:
                 file.write(string)
 
         return string

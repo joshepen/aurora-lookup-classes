@@ -1,11 +1,9 @@
 from bs4 import BeautifulSoup
 from auroranav.AuroraNav import AuroraNav
-import os
 from objects.Course import Course
+from types import FunctionType
 
 # from ui.TkGUI import TkGUI
-
-OUTPUT_DIR = "output/"
 
 
 class AuroraLookupClasses:
@@ -15,7 +13,7 @@ class AuroraLookupClasses:
         password,
         semester,
         courseNames,
-        outputFunction: function,
+        outputFunction: FunctionType,
         outputFilename,
         headless=True,
     ):

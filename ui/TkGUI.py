@@ -4,14 +4,15 @@ import os
 from out.IOutput import IOutput
 from out.OutputString import OutputString
 from logic.AuroraLookupClasses import AuroraLookupClasses
+from types import FunctionType
 
 INPUT_DIR = "input/"
 OUTPUT_DIR = "output/"
 
 
 class TkGUI:
-    def __init__(self, alu: AuroraLookupClasses):
-        self.alu = alu
+    def __init__(self, startFunction: FunctionType):
+        self.startFunction = startFunction
         self.root = tk.Tk()
         self.root.title("AuroraLookupClasses")
         self.consolasFont = tk.font.Font(family="Consolas")
@@ -94,12 +95,10 @@ class TkGUI:
         return names
 
     def Lookup(self):
-        self.alu.LookupClasses(
+        self.startFunction(
             self.usernameEntry.get(),
             self.passwordEntry.get(),
             self.semesterEntry.get(),
             self.GetCourseNames(),
-            OutputString.output,
-            OUTPUT_DIR + self.outFilenameEntry.get() + ".txt",
-            headless=False,
+            self.outFilenameEntry.get(),
         )
