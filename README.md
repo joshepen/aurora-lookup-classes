@@ -1,4 +1,5 @@
 # Aurora Lookup Classes
+A program to gather information on University of Manitoba classes, rather than have a million different tabs open on aurora.
 ## Prerequisites:
 - Have python installed.
 - Have the following python libraries installed:
