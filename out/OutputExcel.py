@@ -1,10 +1,9 @@
-from out.IOutput import IOutput
 from objects.Course import Course
 import openpyxl as xl
 import itertools
 
 
-class OutputExcel(IOutput):
+class OutputExcel:
     @staticmethod
     def output(data: list[Course], filepath: str) -> any:
         wb = xl.Workbook()
@@ -26,7 +25,7 @@ class OutputExcel(IOutput):
                         ws.cell(row=rowIndex, column=colIndex + 1).value = row[colIndex]
                     rowIndex += 1
         wb.remove(wb["Sheet"])
-        wb.save(filepath)
+        wb.save(filepath + ".xlsx")
 
     @staticmethod
     def CourseDataSortFn(course: Course):

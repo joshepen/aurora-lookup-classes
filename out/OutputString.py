@@ -1,11 +1,10 @@
-from out.IOutput import IOutput
 from objects.Course import Course
 import os
 from tabulate import tabulate
 import itertools
 
 
-class OutputString(IOutput):
+class OutputString:
 
     @staticmethod
     def output(data: list[Course], filepath: str = None) -> str:
@@ -22,7 +21,7 @@ class OutputString(IOutput):
         if filepath != None:
             if not os.path.exists(filepath[: filepath.rfind("/")]):
                 os.mkdir(filepath[: filepath.rfind("/")])
-            with open(filepath, "w") as file:
+            with open(filepath + ".txt", "w") as file:
                 file.write(string)
 
         return string
