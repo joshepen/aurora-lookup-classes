@@ -1,11 +1,10 @@
-from out.IOutput import IOutput
 from objects.Course import Course
 import os
 from tabulate import tabulate
 import itertools
 
 
-class OutputString(IOutput):
+class OutputString:
 
     @staticmethod
     def output(data: list[Course], filepath: str = None) -> str:

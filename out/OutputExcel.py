@@ -1,10 +1,9 @@
-from out.IOutput import IOutput
 from objects.Course import Course
 import openpyxl as xl
 import itertools
 
 
-class OutputExcel(IOutput):
+class OutputExcel:
     @staticmethod
     def output(data: list[Course], filepath: str) -> any:
         wb = xl.Workbook()

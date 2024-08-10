@@ -1,9 +1,6 @@
 import tkinter as tk
 import tkinter.font
 import os
-from out.IOutput import IOutput
-from out.OutputString import OutputString
-from logic.AuroraLookupClasses import AuroraLookupClasses
 from types import FunctionType
 
 INPUT_DIR = "input/"
